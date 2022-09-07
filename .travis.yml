@@ -1,1 +1,5 @@
-- docker build -t udagram-api-feed ./udagram-api-feed
+services:
+  docker
+  
+before install:
+  - docker build -t udagram-api-feed ./udagram-api-feed
