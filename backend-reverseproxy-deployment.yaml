@@ -1,45 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # name of the deployment file
   name: reverseproxy-deployment
   labels:
     app: udagram-reverseproxy
 spec:
-  # deployment specifications
-
   replicas: 2
-  # which pods are managed by this deployment?
   selector:
-  # this must match the labels we set on the pod
     matchLabels:
       app: udagram-reverseproxy
-
-  # this template field is a regular pod configuration
-  # nested inside the deployment spec
   template:
     metadata:
-      # set labels on the pod
-      # this is used in the deployment selector
       labels:
         app: udagram-reverseproxy
     spec:
-      # what container to use in the pod
       containers:
-      - name: udagram-reverseproxy
-        image: hanneseb/udagram-reverseproxy:v1
-        env:
-          - name: POSTGRES_USERNAME
-            valueFrom:
-              secretKeyRef:
+        - name: udagram-reverseproxy
+          image: hanneseb/udagram-api-feed:v1
+          envFrom:
+            - configMapRef:
+                name: env-configmap
+            - secretRef:
                 name: env-secret
-                key: postgres_username
-                optional: False
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: env-secret
-                key: postgres_password
-                optional: False
-        ports:
-        - containerPort: 80
+          volumeMounts:
+            - name: aws-secret
+              mountPath: "/root/.aws/"
+              readOnly: true
+          ports:
+          - containerPort: 80
+      volumes:
+        - name: aws-secret
+          secret:
+            secretName: aws-secret
